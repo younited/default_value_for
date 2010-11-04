@@ -1,0 +1,3 @@
+[27 September 2010]
+
+* in the case an attribute has already changed it shouldn't get a default value
