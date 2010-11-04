@@ -1,15 +1,15 @@
 # Copyright (c) 2008 Phusion
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@ module DefaultValueForPlugin
 		def initialize(value)
 			@value = value
 		end
-	
+
 		def evaluate(instance)
 			if @value.duplicable?
 				return @value.dup
@@ -32,17 +32,17 @@ module DefaultValueForPlugin
 			end
 		end
 	end
-	
+
 	class BlockValueContainer
 		def initialize(block)
 			@block = block
 		end
-	
+
 		def evaluate(instance)
 			return @block.call(instance)
 		end
 	end
-	
+
 	module ClassMethods
 		def default_value_for(attribute, value = nil, &block)
 			if !method_defined?(:initialize_with_defaults)
@@ -58,7 +58,7 @@ module DefaultValueForPlugin
 			end
 			_default_attribute_values[attribute.to_s] = container
 		end
-		
+
 		def default_values(values)
 			values.each_pair do |key, value|
 				if value.kind_of? Proc
@@ -69,7 +69,7 @@ module DefaultValueForPlugin
 			end
 		end
 	end
-	
+
 	module InstanceMethods
 		def initialize_with_defaults(attrs = nil)
 			initialize_without_defaults(attrs) do
@@ -84,8 +84,9 @@ module DefaultValueForPlugin
 						x.to_s
 					end
 				end
+				changed_attributes_keys = changed_attributes.keys
 				self.class._default_attribute_values.each do |attribute, container|
-					if safe_attribute_names.nil? || !safe_attribute_names.any? { |attr_name| attr_name =~ /^#{attribute}($|\()/ }
+					if !changed_attributes_keys.include?(attribute) && (safe_attribute_names.nil? || !safe_attribute_names.any? { |attr_name| attr_name =~ /^#{attribute}($|\()/ })
 						__send__("#{attribute}=", container.evaluate(self))
 						changed_attributes.delete(attribute)
 					end
